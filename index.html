@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Solana SWIFT Gateway</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0d1117;
+            color: #e6edf3;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #161b22;
+            border-radius: 16px;
+            padding: 40px;
+            border: 1px solid #30363d;
+        }
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            color: #58a6ff;
+        }
+        .subtitle {
+            color: #8b949e;
+            margin-bottom: 30px;
+        }
+        .master-wallet {
+            background: #0d1117;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            border: 1px solid #30363d;
+            margin-bottom: 20px;
+        }
+        .master-wallet strong {
+            color: #8b949e;
+        }
+        .master-wallet code {
+            color: #f0f6fc;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: #f0f6fc;
+        }
+        textarea {
+            width: 100%;
+            padding: 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 180px;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .btn {
+            background: #238636;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #2ea043;
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #21262d;
+            color: #c9d1d9;
+        }
+        .btn-secondary:hover {
+            background: #30363d;
+        }
+        .flex-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-top: 12px;
+        }
+        .example-link {
+            color: #58a6ff;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 13px;
+        }
+        .example-link:hover {
+            color: #79c0ff;
+        }
+        input[type="text"],
+        input[type="number"] {
+            padding: 10px 14px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 8px;
+            color: #e6edf3;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            flex: 1;
+            min-width: 150px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 16px;
+            background: #0d1117;
+            border-radius: 8px;
+            border: 1px solid #30363d;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+        .response.success {
+            border-color: #238636;
+            display: block;
+        }
+        .response.error {
+            border-color: #da3633;
+            display: block;
+        }
+        .status {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            background: #0d1117;
+            border-left: 4px solid #58a6ff;
+        }
+        .status .label {
+            color: #8b949e;
+            font-size: 13px;
+        }
+        .status .value {
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            color: #f0f6fc;
+        }
+        hr {
+            border: 1px solid #30363d;
+            margin: 24px 0;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #30363d;
+            font-size: 13px;
+            color: #8b949e;
+        }
+        .footer a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌉 Solana SWIFT Gateway</h1>
+        <div class="subtitle">ISO 20022 → Solana USDC Settlement Bridge</div>
+
+        <div class="master-wallet">
+            <strong>🔐 Master Wallet:</strong>
+            <code>2t7rkti6YeUDD32bAgTMS1G4TEpzsMStxYZrLi92zqeM</code>
+        </div>
+
+        <div class="status">
+            <div>
+                <span class="label">🟢 Gateway Status:</span>
+                <span class="value" id="statusText">Loading...</span>
+            </div>
+            <div style="margin-top: 6px">
+                <span class="label">💰 Wallet:</span>
+                <span class="value" id="walletText">Loading...</span>
+            </div>
+        </div>
+
+        <!-- Send SWIFT -->
+        <div class="section">
+            <h2>📤 Send SWIFT Payment (XML)</h2>
+            <textarea id="xmlInput" placeholder="Paste your pacs.008 XML message here..."></textarea>
+            <div class="flex-row">
+                <button class="btn" id="sendBtn">🚀 Send Payment</button>
+                <button class="btn btn-secondary" id="loadSampleBtn">📄 Load Sample</button>
+                <span class="example-link" id="clearBtn">Clear</span>
+            </div>
+            <div id="response" class="response"></div>
+        </div>
+
+        <hr />
+
+        <!-- Quick Test -->
+        <div class="section">
+            <h2>🧪 Quick Test (No SWIFT)</h2>
+            <div class="flex-row">
+                <input type="text" id="testAddress" placeholder="Solana address..." />
+                <input type="number" id="testAmount" placeholder="Amount USDC" style="max-width:150px;" />
+                <button class="btn" id="testBtn">▶ Test</button>
+            </div>
+            <div id="testResponse" class="response"></div>
+        </div>
+
+        <div class="footer">
+            <p>
+                📚 <a href="https://github.com/solana-payment-orchestrator/ungt">GitHub</a> ·
+                <a href="https://github.com/solana-payment-orchestrator/ungt/blob/main/instruction.md">Bank Officer Guide</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Status check
+        async function loadStatus() {
+            try {
+                const res = await fetch('/health');
+                const data = await res.json();
+                document.getElementById('statusText').textContent = '✅ Online';
+                document.getElementById('walletText').textContent = data.masterWallet || 'N/A';
+            } catch (_) {
+                document.getElementById('statusText').textContent = '❌ Offline (start server)';
+                document.getElementById('walletText').textContent = 'N/A';
+            }
+        }
+        loadStatus();
+
+        // Load sample XML
+        document.getElementById('loadSampleBtn').addEventListener('click', async () => {
+            try {
+                const res = await fetch('/sample.xml');
+                const xml = await res.text();
+                document.getElementById('xmlInput').value = xml;
+                document.getElementById('response').className = 'response';
+                document.getElementById('response').textContent = '';
+            } catch (_) {
+                alert('Failed to load sample. Make sure server is running.');
+            }
+        });
+
+        // Clear
+        document.getElementById('clearBtn').addEventListener('click', () => {
+            document.getElementById('xmlInput').value = '';
+            document.getElementById('response').className = 'response';
+            document.getElementById('response').textContent = '';
+        });
+
+        // Send SWIFT
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            const xml = document.getElementById('xmlInput').value.trim();
+            if (!xml) {
+                alert('Please paste a SWIFT XML message.');
+                return;
+            }
+
+            const btn = document.getElementById('sendBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Sending...';
+
+            const respDiv = document.getElementById('response');
+            respDiv.className = 'response';
+            respDiv.textContent = '';
+
+            try {
+                const res = await fetch('/api/swift', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/xml' },
+                    body: xml,
+                });
+                const data = await res.json();
+                respDiv.textContent = JSON.stringify(data, null, 2);
+                respDiv.className = res.ok ? 'response success' : 'response error';
+            } catch (e) {
+                respDiv.textContent = '❌ Error: ' + e.message;
+                respDiv.className = 'response error';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🚀 Send Payment';
+            }
+        });
+
+        // Quick Test
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const to = document.getElementById('testAddress').value.trim();
+            const amount = document.getElementById('testAmount').value.trim();
+
+            if (!to || !amount) {
+                alert('Please fill both address and amount.');
+                return;
+            }
+
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = '⏳ Testing...';
+
+            const respDiv = document.getElementById('testResponse');
+            respDiv.className = 'response';
+            respDiv.textContent = '';
+
+            try {
+                const res = await fetch('/api/send-test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to, amount: parseFloat(amount) }),
+                });
+                const data = await res.json();
+                respDiv.textContent = JSON.stringify(data, null, 2);
+                respDiv.className = res.ok ? 'response success' : 'response error';
+            } catch (e) {
+                respDiv.textContent = '❌ Error: ' + e.message;
+                respDiv.className = 'response error';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '▶ Test';
+            }
+        });
+    </script>
+</body>
+</html>
