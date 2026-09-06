@@ -1,0 +1,18 @@
+{
+  "name": "solana-gateway",
+  "version": "1.0.0",
+  "description": "SWIFT to Solana Gateway",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@solana/web3.js": "^1.98.0",
+    "@solana/spl-token": "^0.4.8",
+    "express": "^4.21.0",
+    "xml2js": "^0.6.2",
+    "dotenv": "^16.4.5",
+    "cors": "^2.8.5",
+    "bs58": "^6.0.0"
+  }
+}
