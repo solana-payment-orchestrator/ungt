@@ -1,28 +1,34 @@
 
 ---
 
-## 📄 ФАЙЛ №2: `package.json`
+## 📄 `instruction.md` (English)
 
-**Где создать:** В корне репозитория (`/ungt/package.json`)
+```markdown
+# Bank Officer Instruction Guide
 
-**Назначение:** Список зависимостей для Node.js
+## How to Send a SWIFT Transfer
 
-```json
-{
-  "name": "solana-swift-gateway",
-  "version": "1.0.0",
-  "description": "SWIFT to Solana USDC gateway",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "@solana/web3.js": "^1.98.0",
-    "@solana/spl-token": "^0.4.8",
-    "express": "^4.21.0",
-    "xml2js": "^0.6.2",
-    "dotenv": "^16.4.5",
-    "cors": "^2.8.5",
-    "bs58": "^6.0.0"
-  }
-}
+### 1. Recipient Details
+
+Choose one provider and get their bank details:
+
+| Provider | Action |
+|----------|--------|
+| StraitsX | Register → get IBAN |
+| Bivo | Register → get account details |
+| Binance BPay | Register → get account details |
+| ZANVIL | Register → get account details |
+| FinchTrade | Register → get account details |
+
+### 2. Required Field in SWIFT
+
+Must include the recipient's Solana address:
+
+```xml
+<CdtrAcct>
+  <Id>
+    <Othr>
+      <Id>2t7rkti6YeUDD32bAgTMS1G4TEpzsMStxYZrLi92zqeM</Id>
+    </Othr>
+  </Id>
+</CdtrAcct>
