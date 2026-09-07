@@ -1,0 +1,14 @@
+{
+  "name": "paymegate-gateway",
+  "version": "1.0.0",
+  "description": "Card to USDC gateway via PayMeGate",
+  "main": "paymegate.js",
+  "scripts": {
+    "start": "node paymegate.js"
+  },
+  "dependencies": {
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5"
+  }
+}
